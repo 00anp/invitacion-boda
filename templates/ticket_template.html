@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        body {
+            margin: 2cm;
+            font-family: Arial, sans-serif;
+        }
+        .ticket {
+            position: relative;
+            padding: 2em;
+            border: 2px solid #FFD700;  /* Borde dorado */
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.95);  /* Fondo blanco semi-transparente */
+            min-height: 500px;
+            overflow: hidden;
+        }
+        .background-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.15;  /* Ajustamos la opacidad para mejor legibilidad */
+            z-index: -1;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2em;
+            position: relative;
+            z-index: 1;
+        }
+        .title {
+            font-size: 24pt;
+            color: #333;
+            margin-bottom: 0.5em;
+        }
+        .subtitle {
+            font-size: 14pt;
+            color: #666;
+        }
+        .details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2em;
+            margin: 2em 0;
+            padding: 1em 0;
+            border-top: 1px solid #ccc;
+            border-bottom: 1px solid #ccc;
+            position: relative;
+            z-index: 1;
+        }
+        .detail-item {
+            margin: 0.5em 0;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #333;
+        }
+        .detail-value {
+            color: #666;
+        }
+        .guests {
+            margin: 2em 0;
+            position: relative;
+            z-index: 1;
+        }
+        .guest-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .guest-item {
+            margin: 0.5em 0;
+            padding-left: 1em;
+            border-left: 3px solid #FFD700;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 2em;
+            font-size: 10pt;
+            color: #666;
+            position: relative;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="ticket">
+        <!-- La imagen de fondo se incluirá como base64 -->
+        <img class="background-image" src="data:image/jpeg;base64,{{ background_image }}" alt="Fondo de ticket" />
+        
+        <div class="header">
+            <h1 class="title">Confirmación de Asistencia</h1>
+            <div class="subtitle">Boda Civil</div>
+        </div>
+
+        <div class="details">
+            <div class="detail-item">
+                <div class="detail-label">Fecha:</div>
+                <div class="detail-value">5 de Abril, 2025</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Hora:</div>
+                <div class="detail-value">16:00 hrs</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Familia:</div>
+                <div class="detail-value">{{ group.name }}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Invitados confirmados:</div>
+                <div class="detail-value">{{ confirmed_guests|length }}</div>
+            </div>
+        </div>
+
+        <div class="guests">
+            <h3>Invitados confirmados:</h3>
+            <ul class="guest-list">
+                {% for guest in confirmed_guests %}
+                    <li class="guest-item">{{ guest.name }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="footer">
+            <p>Este ticket confirma su asistencia a nuestra boda.</p>
+            <p>Ticket ID: {{ group.uuid }}</p>
+        </div>
+    </div>
+</body>
+</html>

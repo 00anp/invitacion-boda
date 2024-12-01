@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="group-welcome p-6 bg-white rounded-lg shadow-lg">
+    {% if group %}
+        <h1 class="text-3xl font-bold mb-4">¡Bienvenida familia {{ group.name }}!</h1>
+        
+        <p class="text-lg text-gray-700 mb-6">
+            Por favor, confirmen su asistencia a nuestra boda:
+        </p>
+        
+        <div id="confirmation-form">
+            <form method="POST" action="/confirm/{{ group.uuid }}">
+                {% for guest in group.guests %}
+                    <div class="guest-item mb-4 p-4 bg-gray-50 rounded-lg">
+                        <div class="flex items-center justify-between">
+                            <span class="font-medium text-lg">{{ guest.name }}</span>
+                            <div class="flex gap-4">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" 
+                                           name="attendance_{{ guest.id }}" 
+                                           value="true"
+                                           {% if guest.has_confirmed and guest.is_attending %}checked{% endif %}
+                                           {% if guest.has_confirmed %}disabled{% endif %}
+                                           class="form-radio text-blue-600"
+                                           required>
+                                    <span class="ml-2">Asistirá</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" 
+                                           name="attendance_{{ guest.id }}" 
+                                           value="false"
+                                           {% if guest.has_confirmed and not guest.is_attending %}checked{% endif %}
+                                           {% if guest.has_confirmed %}disabled{% endif %}
+                                           class="form-radio text-red-600"
+                                           required>
+                                    <span class="ml-2">No asistirá</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                
+                <button type="submit"
+                        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+                        {% if all_confirmed %}disabled{% endif %}>
+                    Confirmar asistencia
+                </button>
+            </form>
+        </div>
+    {% else %}
+        <div class="error-message p-6 bg-red-100 rounded-lg">
+            <h2 class="text-xl text-red-700">
+                Lo sentimos, no encontramos la invitación que estás buscando
+            </h2>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

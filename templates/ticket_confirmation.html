@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto">
+        <!-- Mensaje de éxito -->
+        <div class="bg-green-50 border border-green-200 rounded-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold text-green-700 mb-2">
+                ¡Gracias por tu mensaje y confirmación!
+            </h2>
+            <p class="text-green-600">
+                Hemos registrado tu mensaje y la confirmación de asistencia exitosamente.
+            </p>
+        </div>
+
+        <!-- Ticket Digital -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+            <!-- Encabezado del ticket -->
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
+                <h3 class="text-white text-xl font-bold">Confirmación de Asistencia</h3>
+                <p class="text-blue-100">Boda Civil</p>
+            </div>
+
+            <!-- Contenido del ticket -->
+            <div class="p-6 space-y-6">
+                <!-- Detalles del evento -->
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <p class="text-sm text-gray-500">Fecha y Hora</p>
+                        <p class="font-semibold">{{ event_date }}</p>
+                        <p class="font-semibold">{{ event_time }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Lugar</p>
+                        <p class="font-semibold">{{ event_location }}</p>
+                    </div>
+                </div>
+
+                <!-- Lista de invitados -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-3">Invitados Confirmados</h4>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        {% for guest in confirmed_guests %}
+                            <div class="flex items-center mb-2 last:mb-0">
+                                <span class="text-blue-500 mr-2">•</span>
+                                <span>{{ guest.name }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Mensaje registrado -->
+                {% if message %}
+                    <div>
+                        <h4 class="text-lg font-semibold mb-3">Tu Mensaje</h4>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="italic text-gray-600">"{{ message.content }}"</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Pie del ticket -->
+            <div class="bg-gray-50 px-6 py-4">
+                <p class="text-sm text-gray-500 text-center">
+                    ID de Confirmación: {{ group.uuid }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="flex justify-center space-x-4">
+            <a href="/confirmation/{{ group.uuid }}/pdf" 
+               class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg shadow-sm">
+                Descargar Ticket PDF
+            </a>
+            <a href="/{{ group.uuid }}" 
+               class="text-gray-500 hover:text-gray-700 px-6 py-2">
+                Volver al Inicio
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

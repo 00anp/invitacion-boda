@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="welcome-message p-6 bg-white rounded-lg shadow-lg">
+    <h1 class="text-3xl font-bold mb-4">{{ title }}</h1>
+    <p class="text-lg text-gray-700 mb-4">
+        {{ message }}
+    </p>
+    <p class="text-lg text-gray-700">
+        {{ submessage }}
+    </p>
+</div>
+{% endblock %}
