@@ -17,6 +17,7 @@ import models
 from models import User
 from database import engine, SessionLocal
 from utils.email_config import send_magic_link
+from utils.input_validation import InputValidation
 from config import get_settings
 
 settings = get_settings()
@@ -189,7 +190,38 @@ async def login(
     next_url: str = None
 ):
     try:
-        user = authenticate_user(form_data.username, form_data.password, db)
+        # Validar username
+        username_validation = InputValidation.sanitize_and_validate_input('username', form_data.username)
+        if not username_validation['is_valid']:
+            return templates.TemplateResponse(
+                "login.html",
+                {
+                    "request": request,
+                    "error": username_validation['error_message'],
+                    "next": next_url
+                },
+                status_code=401
+            )
+        
+        # Validar password
+        password_validation = InputValidation.sanitize_and_validate_input('password', form_data.password)
+        if not password_validation['is_valid']:
+            return templates.TemplateResponse(
+                "login.html",
+                {
+                    "request": request,
+                    "error": password_validation['error_message'],
+                    "next": next_url
+                },
+                status_code=401
+            )
+        
+        # Usar las versiones sanitizadas para autenticación
+        user = authenticate_user(
+            username_validation['sanitized_content'], 
+            password_validation['sanitized_content'], 
+            db
+        )
         
         if not user:
             return templates.TemplateResponse(
@@ -228,6 +260,8 @@ async def login(
         return response
         
     except Exception as e:
+        # Log del error para debugging
+        print(f"Error en login: {str(e)}")
         return templates.TemplateResponse(
             "login.html",
             {
@@ -286,34 +320,75 @@ async def forgot_password(
     db: Session = Depends(get_db)
 ):
     """Endpoint para solicitar recuperación de contraseña"""
-    user = db.query(User).filter(User.email == email).first()
-    if not user:
+    try:
+        # Validar formato del email
+        email_validation = InputValidation.sanitize_and_validate_input('email', email)
+        if not email_validation['is_valid']:
+            return templates.TemplateResponse(
+                "login.html",
+                {
+                    "request": request,
+                    "error": "Formato de correo electrónico inválido"
+                }
+            )
+        
+        # Usar el email sanitizado para la búsqueda
+        sanitized_email = email_validation['sanitized_content']
+        user = db.query(User).filter(User.email == sanitized_email).first()
+        
+        # Mantener mensaje genérico por seguridad
+        if not user:
+            return templates.TemplateResponse(
+                "login.html",
+                {
+                    "request": request,
+                    "success": "Si el correo existe, recibirás instrucciones para recuperar tu contraseña"
+                }
+            )
+        
+        # Generar token único
+        reset_token = secrets.token_urlsafe(32)
+        
+        # Guardar token en la base de datos con try/except
+        try:
+            user.reset_token = reset_token
+            user.reset_token_expires = datetime.now(timezone.utc) + timedelta(minutes=15)
+            db.commit()
+        except Exception as e:
+            print(f"Error al guardar token: {str(e)}")
+            db.rollback()
+            return templates.TemplateResponse(
+                "login.html",
+                {
+                    "request": request,
+                    "error": "Error al procesar la solicitud. Por favor, intenta más tarde."
+                }
+            )
+        
+        # Enviar email en segundo plano
+        try:
+            background_tasks.add_task(send_magic_link, sanitized_email, reset_token)
+        except Exception as e:
+            print(f"Error al enviar email: {str(e)}")
+            # No informamos al usuario del error específico por seguridad
+        
         return templates.TemplateResponse(
             "login.html",
             {
                 "request": request,
-                "error": "Si el correo existe, recibirás instrucciones para recuperar tu contraseña"
+                "success": "Si el correo existe, recibirás instrucciones para recuperar tu contraseña"
             }
         )
-    
-    # Generar token único
-    reset_token = secrets.token_urlsafe(32)
-    
-    # Guardar token en la base de datos
-    user.reset_token = reset_token
-    user.reset_token_expires = datetime.now(timezone.utc) + timedelta(minutes=15)
-    db.commit()
-    
-    # Enviar email en segundo plano
-    background_tasks.add_task(send_magic_link, email, reset_token)
-    
-    return templates.TemplateResponse(
-        "login.html",
-        {
-            "request": request,
-            "success": "Si el correo existe, recibirás instrucciones para recuperar tu contraseña"
-        }
-    )
+        
+    except Exception as e:
+        print(f"Error en forgot_password: {str(e)}")
+        return templates.TemplateResponse(
+            "login.html",
+            {
+                "request": request,
+                "error": "Error al procesar la solicitud. Por favor, intenta más tarde."
+            }
+        )
 
 @router.get("/reset-password/{token}")
 async def reset_password_form(

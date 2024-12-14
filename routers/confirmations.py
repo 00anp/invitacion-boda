@@ -13,9 +13,11 @@ import base64
 from pathlib import Path as PathLib
 from PIL import Image, ImageDraw, ImageFont
 import os
+import re
 #On File
 from models import User, Group, Guest, Message, MessageSignature
 from database import engine, SessionLocal
+from utils.input_validation import InputValidation
 
 
 router = APIRouter(
@@ -307,52 +309,106 @@ async def process_final_step(
         message_content = form.get("message", "").strip()
         signer_ids = form.getlist("signers")
         
+        # Validar UUID del grupo
+        if not re.match(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', group_uuid):
+            return templates.TemplateResponse(
+                "confirmation/steps/error.html",
+                {
+                    "request": request,
+                    "error": "Identificador de grupo inválido"
+                }
+            )
+        
         group = db.query(Group).filter(Group.uuid == group_uuid).first()
         if not group:
-            raise HTTPException(status_code=404, detail="Grupo no encontrado")
+            return templates.TemplateResponse(
+                "confirmation/steps/error.html",
+                {
+                    "request": request,
+                    "error": "Grupo no encontrado"
+                }
+            )
 
         # Actualizar el estado de confirmación de los invitados
         current_time = datetime.now()
         confirmed_guests = []
         has_attending_guests = False
+        message_to_save = None
         
-        # Obtener todos los invitados del grupo y actualizar su estado
-        guests = db.query(Guest).filter(Guest.group_id == group.id).all()
-        for guest in guests:
-            attendance_key = f"attendance_{guest.id}"
-            if attendance_key in request.session:
-                is_attending = request.session[attendance_key]
-                guest.has_confirmed = True
-                guest.is_attending = is_attending
-                guest.confirmation_date = current_time
-                if is_attending:
-                    has_attending_guests = True
-                confirmed_guests.append({
-                    "id": guest.id,
-                    "name": guest.name,
-                    "is_attending": is_attending
-                })
+        try:
+            # Obtener todos los invitados del grupo y actualizar su estado
+            guests = db.query(Guest).filter(Guest.group_id == group.id).all()
+            valid_guest_ids = {str(guest.id) for guest in guests}
+            
+            for guest in guests:
+                attendance_key = f"attendance_{guest.id}"
+                if attendance_key in request.session:
+                    is_attending = request.session[attendance_key]
+                    guest.has_confirmed = True
+                    guest.is_attending = is_attending
+                    guest.confirmation_date = current_time
+                    if is_attending:
+                        has_attending_guests = True
+                    confirmed_guests.append({
+                        "id": guest.id,
+                        "name": guest.name,
+                        "is_attending": is_attending
+                    })
 
-        # Si hay mensaje, guardarlo junto con todas las firmas seleccionadas
-        if message_content:
-            new_message = Message(
-                group_id=group.id,
-                content=message_content
-            )
-            db.add(new_message)
-            db.flush()
+            # Validar el mensaje si existe
+            if message_content:
+                message_validation = InputValidation.sanitize_and_validate_input('message', message_content)
+                if not message_validation['is_valid']:
+                    return templates.TemplateResponse(
+                        "confirmation/steps/error.html",
+                        {
+                            "request": request,
+                            "error": message_validation['error_message']
+                        }
+                    )
+                message_to_save = message_validation['sanitized_content']
+                
+                # Validar IDs de firmantes
+                invalid_signers = [signer_id for signer_id in signer_ids 
+                                 if signer_id not in valid_guest_ids]
+                if invalid_signers:
+                    return templates.TemplateResponse(
+                        "confirmation/steps/error.html",
+                        {
+                            "request": request,
+                            "error": "Firmantes inválidos detectados"
+                        }
+                    )
 
-            # Guardar las firmas de todos los firmantes seleccionados
-            # sin importar si asistirán o no
-            for signer_id in signer_ids:
-                signature = MessageSignature(
-                    message_id=new_message.id,
-                    guest_id=int(signer_id)
+                # Guardar mensaje sanitizado
+                new_message = Message(
+                    group_id=group.id,
+                    content=message_to_save
                 )
-                db.add(signature)
+                db.add(new_message)
+                db.flush()
 
-        # Guardar todos los cambios
-        db.commit()
+                # Guardar firmas validadas
+                for signer_id in signer_ids:
+                    signature = MessageSignature(
+                        message_id=new_message.id,
+                        guest_id=int(signer_id)
+                    )
+                    db.add(signature)
+
+            # Guardar todos los cambios
+            db.commit()
+
+        except Exception as e:
+            db.rollback()
+            print(f"Error en proceso de confirmación: {str(e)}")
+            return templates.TemplateResponse(
+                "confirmation/steps/error.html",
+                {
+                    "request": request,
+                    "error": "Error al procesar la confirmación. Por favor, intenta nuevamente."
+                }
+            )
 
         return templates.TemplateResponse(
             "confirmation/success.html",
@@ -365,17 +421,19 @@ async def process_final_step(
                 },
                 "confirmed_guests": confirmed_guests,
                 "has_attending_guests": has_attending_guests,
-                "message": message_content if message_content else None,
+                "message": message_to_save if message_to_save else None,
                 "success": True
             }
         )
 
     except Exception as e:
+        print(f"Error general en process_final_step: {str(e)}")
         return templates.TemplateResponse(
             "confirmation/steps/error.html",
             {
                 "request": request,
-                "error": f"Error procesando la confirmación final: {str(e)}"
+                "error": "Error procesando la confirmación. Por favor, intenta nuevamente.",
+                "group_uuid": group_uuid
             }
         )
    
