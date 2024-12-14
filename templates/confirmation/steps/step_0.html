@@ -1,0 +1,23 @@
+<div class="confirmation-step">
+    <div class="backdrop-filter">
+        <h2 class="text-primary text-3xl m-lg text-shadow">Confirmación</h2>
+        <div class="max-w-lg mx-auto text-center">
+            <p class="m-md text-shadow">
+                Celebrar nuestro amor es un sueño hecho realidad y para que sea
+                perfecto te pedimos confirmar tu asistencia antes del:
+            </p>
+            <p class="text-xl font-bold m-lg text-shadow">15 de febrero de 2025</p>
+            <p class="m-md text-shadow">
+                Después de esa fecha no nos será posible reservar tu lugar.
+            </p>
+            <p class="m-md text-shadow">Gracias por tu comprensión y apoyo.</p>
+            <button
+                hx-get="/htmx/confirm/{{ group.uuid }}/start"
+                hx-target="#confirmation-form"
+                hx-swap="innerHTML"
+                class="continue-btn btn bg-secondary text-dark m-lg">
+                Confirmar
+            </button>
+        </div>
+    </div>
+</div>

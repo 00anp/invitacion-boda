@@ -1,0 +1,159 @@
+<!-- Actualización del template messages.html -->
+{% extends "admin_base.html" %}
+
+{% block admin_content %}
+<div class="admin-container">
+    <!-- Encabezado -->
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <h2 class="admin-card-title">Mensajes de Nuestros Invitados</h2>
+            <p class="admin-text-sm">Palabras llenas de cariño y buenos deseos para nuestra boda</p>
+        </div>
+    </div>
+
+    <!-- Grid de mensajes -->
+    <div class="admin-messages-grid">
+        {% for message in messages %}
+        <div class="admin-card-message">
+            <!-- Contenido del mensaje -->
+            <div class="message-content admin-message-content">
+                <p id="admin-message-text">{{ message.content }}</p>
+            </div>
+            
+            <!-- Firmantes -->
+            <div class="signatures-section">
+                <p class="admin-text-sm admin-font-bold admin-mb-2">Firmado por:</p>
+                <div class="admin-flex admin-flex-wrap admin-gap-2">
+                    {% for signature in message.signatures %}
+                    <span class="admin-badge admin-badge-success">
+                        {{ signature.guest.name }}
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Footer con fecha y grupo -->
+            <div class="card-footer">
+                <span>Grupo {{ message.group.name }}</span>
+                <span>{{ message.created_at.strftime('%d/%m/%Y') }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_extra_css %}
+<style>
+.admin-card-message {
+    background-color: var(--admin-surface);
+    border-radius: var(--admin-radius-lg);
+    box-shadow: var(--admin-shadow-md);
+    padding: var(--admin-spacing-lg);
+    margin-bottom: var(--admin-spacing-md);
+    transition: transform 0.2s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    height: 300px; /* Altura fija para todas las tarjetas */
+}
+
+/* Contenedor grid para las tarjetas */
+.admin-messages-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--admin-spacing-lg);
+    padding: var(--admin-spacing-md);
+}
+
+/* Hover effect para las tarjetas */
+.admin-card-message:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--admin-shadow-lg);
+}
+
+/* Contenido de la tarjeta */
+.admin-card-message .message-content {
+    flex: 1;
+    overflow-y: auto; /* Agregar scroll vertical */
+    margin-bottom: var(--admin-spacing-md);
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--admin-text);
+    padding-right: var(--admin-spacing-sm); /* Espacio para el scrollbar */
+}
+
+/* Estilizar el scrollbar */
+.admin-card-message .message-content::-webkit-scrollbar {
+    width: 4px;
+}
+
+.admin-card-message .message-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.admin-card-message .message-content::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.admin-card-message .message-content::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.admin-message-content, .message-content {
+    border: none;
+    margin-top: 0;
+}
+
+.admin-message-text {
+    font-style: normal;
+}
+
+/* Sección de firmas */
+.admin-card-message .signatures-section {
+    border-top: 1px solid var(--admin-border);
+    padding-top: var(--admin-spacing-md);
+    margin-top: auto; /* Empuja la sección al final del espacio disponible */
+}
+
+/* Footer de la tarjeta */
+.admin-card-message .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--admin-spacing-md);
+    font-size: 0.875rem;
+    color: var(--admin-text-light);
+}
+
+/* Media queries para responsividad */
+@media (max-width: 1200px) {
+    .admin-messages-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-messages-grid {
+        grid-template-columns: 1fr;
+        gap: var(--admin-spacing-md);
+        padding: var(--admin-spacing-sm);
+    }
+
+    .admin-card-message {
+        padding: var(--admin-spacing-md);
+        margin-bottom: var(--admin-spacing-sm);
+        height: 250px; /* Altura más pequeña para móviles */
+    }
+
+    .admin-card-message .message-content {
+        font-size: 0.9375rem;
+    }
+
+    .admin-card-message .signatures-section {
+        padding-top: var(--admin-spacing-sm);
+    }
+}
+</style>
+{% endblock %}

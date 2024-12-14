@@ -1,0 +1,70 @@
+<div class="confirmation-step">
+    <!-- Encabezado -->
+    <div class="step-header">
+        <h2>Mensaje para los Novios</h2>
+        <p>Paso 3 de 3</p>
+    </div>
+
+    <!-- Contenido -->
+    <div class="step-content">
+        <h3>¡Gracias por confirmar!</h3>
+        <p>Si lo desean, pueden dejar un mensaje especial para los novios:</p>
+
+        <!-- Formulario con HTMX para el mensaje final -->
+        <form hx-post="/htmx/confirm/{{ group.uuid }}/step/3"
+              hx-target="#confirmation-form"
+              hx-swap="innerHTML"
+              class="message-form">
+            
+            <!-- Campo del mensaje -->
+            <div class="message-field">
+                <label for="message">Su mensaje:</label>
+                <textarea 
+                    name="message" 
+                    id="message" 
+                    rows="4" 
+                    placeholder="Escribe tus buenos deseos o mensaje para los novios..."></textarea>
+            </div>
+
+            <!-- Selección de firmantes -->
+            <div class="signers-section">
+                <label>¿Quién firma este mensaje?</label>
+                <div class="signers-list">
+                    {% for guest in confirmed_guests %}
+                    <label class="signer-option">
+                        <input type="checkbox" 
+                               name="signers" 
+                               value="{{ guest.id }}"
+                               id="signer_{{ guest.id }}">
+                        <span class="signer-name">
+                            {{ guest.name }}
+                        </span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Botones de navegación -->
+            <div class="step-navigation">
+                <button type="button"
+                        class="btn btn-secondary continue-btn"
+                        hx-get="/htmx/confirm/{{ group.uuid }}"
+                        hx-target="#confirmation-form">
+                    ← Regresar
+                </button>
+                <button type="submit" class="btn continue-btn">
+                    Finalizar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Indicador de progreso -->
+    <div class="step-progress">
+        <div class="progress-bar">
+            <div class="progress-segment active"></div>
+            <div class="progress-segment active"></div>
+            <div class="progress-segment active"></div>
+        </div>
+    </div>
+</div>

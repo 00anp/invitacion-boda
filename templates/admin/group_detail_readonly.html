@@ -1,0 +1,202 @@
+{% extends "admin_base.html" %}
+
+{% block admin_content %}
+<div class="admin-container">
+    <!-- Encabezado -->
+    <div class="admin-card" id="admin-card-1">
+        <div class="admin-card-header">
+            <div class="admin-flex admin-justify-between admin-items-center" id="group-info">
+                <div>
+                    <h2 class="admin-card-title">Grupo: {{ group.name }}</h2>
+                    <p class="admin-text-sm admin-mt-2">UUID: {{ group.uuid }}</p>
+                </div>
+                <div class="admin-flex admin-gap-2">
+                    {% if has_confirmed_attendees %}
+                        <a href="/admin/ticket/{{ group.uuid }}/jpg" 
+                        class="admin-btn admin-btn-primary">
+                            <i class="fa-solid fa-ticket"></i>
+                            Exportar Boleto
+                        </a>
+                    {% endif %}
+                    <button onclick="copyLink('{{ group.uuid }}')" class="admin-btn admin-btn-secondary" id="copy-btn">
+                        Copiar Link de Invitación
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Lista de invitados (solo lectura) -->
+    <div class="admin-card admin-mt-4" id="admin-card-2">
+        <div class="admin-card-header">
+            <h3 class="admin-card-title">Invitados del Grupo</h3>
+        </div>
+
+        <div class="admin-table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for guest in group.guests %}
+                    <tr>
+                        <td>{{ guest.name }}</td>
+                        <td>
+                            {% if guest.has_confirmed %}
+                                {% if guest.is_attending %}
+                                    <span class="admin-badge admin-badge-success">Asistirá</span>
+                                {% else %}
+                                    <span class="admin-badge admin-badge-danger">No Asistirá</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="admin-badge admin-badge-warning">Pendiente</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="copyFeedback" class="admin-copy-feedback">
+    Link copiado al portapapeles
+</div>
+{% endblock %}
+
+{% block admin_extra_js %}
+<script>
+async function copyLink(uuid) {
+    const link = `https://mariana-y-josue.com/${uuid}`;
+    try {
+        await navigator.clipboard.writeText(link);
+        showCopyFeedback();
+    } catch (err) {
+        const textArea = document.createElement('textarea');
+        textArea.value = link;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            showCopyFeedback();
+        } catch (err) {
+            console.error('Error al copiar:', err);
+        }
+        document.body.removeChild(textArea);
+    }
+}
+
+function showCopyFeedback() {
+    const feedback = document.getElementById('copyFeedback');
+    feedback.classList.add('show');
+    setTimeout(() => feedback.classList.remove('show'), 2000);
+}
+
+// Event Listener para cerrar feedback
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('#copyFeedback')) {
+        document.getElementById('copyFeedback').classList.remove('show');
+    }
+});
+</script>
+
+<style>
+/* Estilos para las tarjetas de estadísticas */
+
+#copy-btn {
+    margin-left: 0.5rem;
+}
+
+.admin-stat-card {
+    padding: 1rem;
+    background-color: #F3F4F6;
+    border-radius: 0.5rem;
+    text-align: center;
+}
+
+.admin-stat-title {
+    font-size: 0.875rem;
+    color: #4B5563;
+    margin-bottom: 0.5rem;
+}
+
+.admin-stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #1F2937;
+}
+
+.admin-bg-success {
+    background-color: #D1FAE5;
+}
+
+.admin-bg-danger {
+    background-color: #FEE2E2;
+}
+
+/* Estilos para las tarjetas de mensajes */
+.admin-message-card {
+    background-color: #F9FAFB;
+    border: 1px solid #E5E7EB;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.admin-message-content {
+    font-size: 1rem;
+    color: #1F2937;
+    margin-bottom: 1rem;
+}
+
+.admin-message-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+    color: #6B7280;
+}
+
+.admin-message-signatures .admin-badge {
+    margin-right: 0.5rem;
+}
+
+/* Mantener los estilos existentes del feedback de copiado */
+.admin-copy-feedback {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: #10B981;
+    color: white;
+    border-radius: 0.375rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    transform: translateY(1rem);
+    transition: all 0.3s ease;
+    z-index: 50;
+}
+
+.admin-copy-feedback.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#group-info {
+    display:flex;
+    flex-direction: column;
+    
+}
+
+@media(max-width:768px){
+    #admin-card-1, 
+    #admin-card-2{
+        flex: 0 1 0px;
+    }
+}
+</style>
+{% endblock %}

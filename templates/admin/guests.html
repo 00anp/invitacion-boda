@@ -1,0 +1,76 @@
+{% extends "admin_base.html" %}
+
+{% block admin_content %}
+<div class="admin-container guest-admin-container">
+    <!-- Encabezado -->
+    <div class="admin-card guest-admin-card">
+        <div class="admin-card-header">
+            <div class="admin-flex admin-justify-between admin-items-center">
+                <h2 class="admin-card-title">Gestión de Invitados</h2>
+                <div class="admin-flex admin-gap-2">
+                    <a href="/admin/guests/export" class="admin-btn admin-btn-success">
+                        Exportar a Excel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de Importación - Solo visible para admins -->
+    {% if is_admin %}
+    <div class="admin-card admin-mt-4 guest-admin-card">
+        <h3 class="admin-card-title admin-mb-4">Importar Invitados desde Excel</h3>
+        <form action="/admin/guests/import" 
+              method="POST" 
+              enctype="multipart/form-data">
+            <div class="admin-form-group">
+                <label for="excel_file" class="admin-label">
+                    Archivo Excel
+                </label>
+                <input type="file" 
+                       id="excel_file"
+                       name="file"  
+                       accept=".xlsx,.xls"
+                       required
+                       class="admin-input">
+                <p class="admin-text-sm admin-mt-2">
+                    El archivo debe contener las columnas: Grupo, Nombre, Email, Teléfono
+                </p>
+            </div>
+
+            {% if error %}
+            <div class="admin-alert admin-alert-error">
+                <div class="admin-flex">
+                    <div class="admin-flex-shrink-0">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                    </div>
+                    <div class="admin-ml-2">
+                        <h3 class="admin-text-sm">{{ error }}</h3>
+                        {% if error_details %}
+                        <ul class="admin-list">
+                            {% for detail in error_details %}
+                            <li>{{ detail }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="admin-flex admin-justify-end">
+                <button type="submit" class="admin-btn admin-btn-primary">
+                    Importar Invitados
+                </button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if not is_admin %}
+    <div class="admin-alert admin-alert-info admin-mt-4">
+        <p>Tienes acceso para exportar la lista de invitados a Excel.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

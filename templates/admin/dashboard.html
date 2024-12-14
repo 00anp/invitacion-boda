@@ -1,0 +1,212 @@
+{% extends "admin_base.html" %}
+
+{% block admin_content %}
+<div class="admin-dashboard">
+    <!-- Métricas principales -->
+    <div class="admin-grid admin-grid-cols-5 admin-mb-6">
+        <!-- Total invitados -->
+        <div class="admin-card admin-metric admin-metric-total" onclick="filterGuests('all')" data-filter="all">
+            <h3 class="admin-card-title">Invitados</h3>
+            <p class="admin-text-2xl admin-mt-2">{{ stats.total_guests }}</p>
+        </div>
+        <!-- Confirmados -->
+        <div class="admin-card admin-metric admin-metric-confirmed" onclick="filterGuests('confirmed')" data-filter="confirmed">
+            <h3 class="admin-card-title">Confirmados</h3>
+            <p class="admin-text-2xl admin-mt-2">{{ stats.confirmed_guests }}</p>
+        </div>
+        <!-- Pendientes -->
+        <div class="admin-card admin-metric admin-metric-pending" onclick="filterGuests('pending')" data-filter="pending">
+            <h3 class="admin-card-title">Pendientes</h3>
+            <p class="admin-text-2xl admin-mt-2">{{ stats.pending_guests }}</p>
+        </div>
+        <!-- Asistirán -->
+        <div class="admin-card admin-metric admin-metric-attending" onclick="filterGuests('attending')" data-filter="attending">
+            <h3 class="admin-card-title">Asistirán</h3>
+            <p class="admin-text-2xl admin-mt-2">{{ stats.attending_guests }}</p>
+        </div>
+        <!-- No Asistirán -->
+        <div class="admin-card admin-metric admin-metric-not-attending" onclick="filterGuests('not_attending')" data-filter="not_attending">
+            <h3 class="admin-card-title">No Asistirán</h3>
+            <p class="admin-text-2xl admin-mt-2">{{ stats.not_attending_guests }}</p>
+        </div>
+    </div>
+
+    <!-- Lista de invitados -->
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <div class="admin-flex admin-justify-between admin-items-center">
+                <h2 class="admin-card-title">Listado de Invitados</h2>
+            </div>
+        </div>
+
+        <div class="admin-table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th class="col-id">ID</th>
+                        <th>Grupo</th>
+                        <th>Link</th>
+                        <th class="col-nombre">Nombre</th>
+                        <th class="col-estado" data-header="Estado">Estado</th>
+                        <th class="col-estado" data-header="Estado-short" style="display: none;">EST.</th>
+                        <th class="col-asistencia" data-header="Asistencia">Asistencia</th>
+                        <th class="col-asistencia" data-header="Asistencia-short" style="display: none;">ASIST.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for guest in guests %}
+                    <tr data-confirmed="{{ 'true' if guest.has_confirmed else 'false' }}" 
+        data-attending="{{ 'true' if guest.has_confirmed and guest.is_attending else 'false' }}">
+                        <td>{{ guest.id }}</td>
+                        <td>
+                            {% if guest.group %}
+                                <a href="{{ url_for('view_group_details', group_id=guest.group.id) }}" class="admin-link">
+                                    {{ guest.group.name }}
+                                </a>
+                            {% else %}
+                                <span class="admin-text-gray">Sin grupo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button onclick="copyLink('{{ guest.group.uuid }}')" class="admin-link-copy">
+                                🔗
+                            </button>
+                        </td>
+                        <td class="col-name">{{ guest.name }}</td>
+                        <td>
+                            {% if guest.has_confirmed %}
+                                <span class="admin-badge admin-badge-success">
+                                    <span class="status-icon">✓</span>
+                                    <span class="status-text">Confirmado</span>
+                                </span>
+                            {% else %}
+                                <span class="admin-badge admin-badge-warning">
+                                    <span class="status-icon">⏳</span>
+                                    <span class="status-text">Pendiente</span>
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if guest.has_confirmed %}
+                                {% if guest.is_attending %}
+                                    <span class="admin-badge admin-badge-success">
+                                        <span class="attendance-icon">👍</span>
+                                        <span class="attendance-text">Asistirá</span>
+                                    </span>
+                                {% else %}
+                                    <span class="admin-badge admin-badge-danger">
+                                        <span class="attendance-icon">👎</span>
+                                        <span class="attendance-text">No Asistirá</span>
+                                    </span>
+                                {% endif %}
+                            {% else %}
+                                <span class="admin-badge">
+                                    <span class="attendance-icon">❓</span>
+                                    <span class="attendance-text">Sin confirmar</span>
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Acciones rápidas -->
+    <div class="admin-grid admin-grid-cols-2 admin-mt-6">
+        <!-- Últimos mensajes -->
+        <div class="admin-card">
+            <h3 class="admin-card-title">Últimos Mensajes</h3>
+            <div class="admin-mt-4">
+                <a href="/admin/messages" class="admin-btn admin-btn-secondary">Ver mensajes</a>
+            </div>
+        </div>
+        <!-- Gestión de usuarios -->
+        {% if user and user.is_admin %}
+        <div class="admin-card">
+            <h3 class="admin-card-title">Gestión de Usuarios</h3>
+            <div class="admin-mt-4">
+                <a href="/admin/users" class="admin-btn admin-btn-secondary">Administrar usuarios</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div id="copyFeedback" class="admin-copy-feedback">
+    ¡Link copiado!
+</div>
+{% endblock %}
+
+{% block admin_extra_js %}
+<script>
+    // Manejo del menú móvil
+    
+    
+    // Funcionalidad de filtrado
+    function filterGuests(filter) {
+        // Actualizar estado activo de las métricas
+        const metrics = document.querySelectorAll('.admin-metric');
+        metrics.forEach(metric => {
+            metric.classList.toggle('active', metric.dataset.filter === filter);
+        });
+        
+        // Filtrar filas de la tabla
+        const rows = document.querySelectorAll('.admin-table tbody tr');
+        rows.forEach(row => {
+            let show = false;
+            const isConfirmed = row.dataset.confirmed === 'true';
+            const isAttending = row.dataset.attending === 'true';
+            
+            switch(filter) {
+                case 'all':
+                    show = true;
+                    break;
+                case 'confirmed':
+                    show = isConfirmed;
+                    break;
+                case 'pending':
+                    show = !isConfirmed;
+                    break;
+                case 'attending':
+                    show = isAttending;
+                    break;
+                case 'not_attending':
+                    show = isConfirmed && !isAttending;
+                    break;
+            }
+            
+            row.style.display = show ? '' : 'none';
+        });
+    }
+    
+    // Copiar link
+    async function copyLink(uuid) {
+        const link = `https://mariana-y-josue.com/${uuid}`;
+        try {
+            await navigator.clipboard.writeText(link);
+            showCopyFeedback();
+        } catch (err) {
+            console.error('Error al copiar:', err);
+            const textArea = document.createElement('textarea');
+            textArea.value = link;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showCopyFeedback();
+            } catch (err) {
+                console.error('Error en fallback de copia:', err);
+            }
+            document.body.removeChild(textArea);
+        }
+    }
+    
+    function showCopyFeedback() {
+        const feedback = document.getElementById('copyFeedback');
+        feedback.classList.add('show');
+        setTimeout(() => feedback.classList.remove('show'), 2000);
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar Sesión - Panel Administrativo{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/admin.css">
+{% endblock %}
+
+{% block content %}
+<div class="admin-login-container">
+    <div class="admin-login-card">
+        <!-- Encabezado del login -->
+        <div class="admin-login-header">
+            <h2 class="admin-card-title">Iniciar Sesión</h2>
+            <p class="admin-mt-2 admin-text-light">
+                Ingresa tus credenciales para acceder al panel administrativo
+            </p>
+        </div>
+
+        <!-- Mensajes de error/éxito -->
+        {% if error %}
+        <div class="admin-alert admin-alert-error">
+            <div class="admin-flex admin-items-center">
+                <div class="admin-flex-shrink-0">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                </div>
+                <div class="admin-ml-2">
+                    {{ error }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if success %}
+        <div class="admin-alert admin-alert-success">
+            <div class="admin-flex admin-items-center">
+                <div class="admin-flex-shrink-0">
+                    <i class="fa-solid fa-check-circle"></i>
+                </div>
+                <div class="admin-ml-2">
+                    {{ success }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Formulario de login -->
+        <form method="POST" action="/auth/token{% if next %}?next={{ next }}{% endif %}" class="admin-mt-4" id="loginForm">
+            <!-- Campo de usuario -->
+            <div class="admin-form-group">
+                <label for="username" class="admin-label">
+                    Usuario
+                </label>
+                <input 
+                    id="username" 
+                    name="username" 
+                    type="text" 
+                    required
+                    class="admin-input"
+                    placeholder="Ingresa tu usuario">
+            </div>
+
+            <!-- Campo de contraseña -->
+            <div class="admin-form-group">
+                <label for="password" class="admin-label">
+                    Contraseña
+                </label>
+                <input 
+                    id="password" 
+                    name="password" 
+                    type="password" 
+                    required
+                    class="admin-input"
+                    placeholder="Ingresa tu contraseña">
+            </div>
+
+            <!-- Botón de submit -->
+            <div class="admin-mt-6">
+                <button type="submit" class="admin-btn admin-btn-primary admin-w-full">
+                    Iniciar Sesión
+                </button>
+            </div>
+        </form>
+
+        <!-- Formulario de recuperación de contraseña (inicialmente oculto) -->
+        <form method="POST" action="/auth/forgot-password" class="admin-mt-4 hidden" id="forgotForm">
+            <div class="admin-form-group">
+                <label for="recovery_email" class="admin-label">
+                    Correo Electrónico
+                </label>
+                <input 
+                    id="recovery_email" 
+                    name="email" 
+                    type="email" 
+                    required
+                    class="admin-input"
+                    placeholder="Ingresa tu correo electrónico">
+            </div>
+
+            <div class="admin-mt-6">
+                <button type="submit" class="admin-btn admin-btn-primary admin-w-full">
+                    Enviar Link de Recuperación
+                </button>
+                <button type="button" class="admin-btn admin-btn-secondary admin-w-full admin-mt-2" onclick="toggleForms('login')">
+                    Volver al Login
+                </button>
+            </div>
+        </form>
+
+        <!-- Enlaces adicionales -->
+        <div class="admin-mt-4 admin-text-center">
+            <a href="#" onclick="toggleForms('forgot'); return false;" class="admin-link admin-text-sm" id="forgotLink">
+                ¿Olvidaste tu contraseña?
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleForms(show) {
+    const loginForm = document.getElementById('loginForm');
+    const forgotForm = document.getElementById('forgotForm');
+    const forgotLink = document.getElementById('forgotLink');
+
+    if (show === 'forgot') {
+        loginForm.classList.add('hidden');
+        forgotForm.classList.remove('hidden');
+        forgotLink.classList.add('hidden');
+    } else {
+        loginForm.classList.remove('hidden');
+        forgotForm.classList.add('hidden');
+        forgotLink.classList.remove('hidden');
+    }
+}
+</script>
+
+<style>
+.hidden {
+    display: none;
+}
+</style>
+{% endblock %}

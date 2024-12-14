@@ -1,0 +1,297 @@
+{% extends "admin_base.html" %}
+
+{% block admin_content %}
+<div class="admin-container">
+    <!-- Encabezado -->
+    <div class="admin-card-header">
+        <div class="admin-flex admin-justify-between admin-items-center">
+            <h2 class="admin-card-title">Editar Usuario</h2>
+            <a href="/admin/users" class="admin-btn admin-btn-secondary">
+                Volver a la lista
+            </a>
+        </div>
+    </div>
+
+    <!-- Formulario de edición -->
+    <div class="admin-card">
+        {% if error %}
+        <div class="admin-alert admin-alert-error">
+            <div class="admin-flex admin-items-center">
+                <div class="admin-flex-shrink-0">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                </div>
+                <div class="admin-ml-2">
+                    {{ error }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <form id="editUserForm" method="POST" action="/admin/users/{{ edit_user.id }}/edit" class="admin-form">
+            <div class="admin-grid admin-grid-cols-2">
+                <div class="admin-form-group">
+                    <label for="username" class="admin-label">
+                        Nombre de Usuario
+                    </label>
+                    <input type="text" 
+                           name="username" 
+                           id="username" 
+                           value="{{ edit_user.username }}"
+                           required
+                           class="admin-input">
+                    <p class="admin-text-sm admin-mt-1">
+                        El nombre de usuario debe ser único en el sistema
+                    </p>
+                </div>
+
+                <div class="admin-form-group">
+                    <label for="email" class="admin-label">
+                        Correo Electrónico
+                    </label>
+                    <input type="email" 
+                           name="email" 
+                           id="email" 
+                           value="{{ edit_user.email }}"
+                           required
+                           class="admin-input">
+                </div>
+
+                <div class="admin-form-group">
+                    <div class="admin-flex admin-justify-between">
+                        <label for="password" class="admin-label">
+                            Nueva Contraseña
+                        </label>
+                        <span class="admin-text-sm">(Opcional)</span>
+                    </div>
+                    <input type="password" 
+                           name="password" 
+                           id="password"
+                           class="admin-input"
+                           autocomplete="new-password"
+                           placeholder="Dejar en blanco para mantener la contraseña actual">
+                    <p class="admin-text-sm admin-mt-1">
+                        Mínimo 8 caracteres, debe incluir números y letras
+                    </p>
+                </div>
+
+                <div class="admin-form-group">
+                    <label for="confirm_password" class="admin-label">
+                        Confirmar Nueva Contraseña
+                    </label>
+                    <input type="password" 
+                           name="confirm_password" 
+                           id="confirm_password"
+                           class="admin-input"
+                           autocomplete="new-password">
+                </div>
+
+                <div class="admin-form-group admin-col-span-2">
+                    <label class="admin-flex admin-items-center admin-gap-2">
+                        <input type="checkbox" 
+                               name="is_admin" 
+                               id="is_admin"
+                               {% if edit_user.is_admin %}checked{% endif %}
+                               class="admin-checkbox">
+                        <span class="admin-label">Es administrador</span>
+                    </label>
+                    <p class="admin-text-sm admin-mt-1">
+                        Los administradores tienen acceso a todas las funciones del sistema
+                    </p>
+                </div>
+            </div>
+
+            <div class="admin-flex admin-justify-end admin-gap-4 admin-mt-6">
+                <a href="/admin/users"
+                   class="admin-btn admin-btn-secondary">
+                    Cancelar
+                </a>
+                <button type="submit"
+                        id="submitBtn"
+                        class="admin-btn admin-btn-primary">
+                    Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="confirmModal" class="admin-modal">
+    <div class="admin-modal-content">
+        <div class="admin-modal-header">
+            <h3 class="admin-modal-title">Confirmar Cambios</h3>
+            <button type="button" class="admin-modal-close" id="closeModal">&times;</button>
+        </div>
+        <div class="admin-modal-body">
+            <p>¿Estás seguro de que deseas guardar los cambios?</p>
+            <div id="changesPreview" class="admin-mt-4">
+                <!-- Los cambios se mostrarán aquí -->
+            </div>
+        </div>
+        <div class="admin-modal-footer">
+            <button type="button" class="admin-btn admin-btn-secondary" id="cancelModal">Cancelar</button>
+            <button type="button" class="admin-btn admin-btn-primary" id="confirmChanges">Confirmar</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block admin_extra_css %}
+<style>
+    .admin-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+    }
+
+    .admin-modal.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .admin-modal-content {
+        background-color: white;
+        border-radius: var(--admin-radius-lg);
+        width: 90%;
+        max-width: 500px;
+        box-shadow: var(--admin-shadow-lg);
+    }
+
+    .admin-modal-header {
+        padding: var(--admin-spacing-md);
+        border-bottom: 1px solid var(--admin-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .admin-modal-body {
+        padding: var(--admin-spacing-lg);
+    }
+
+    .admin-modal-footer {
+        padding: var(--admin-spacing-md);
+        border-top: 1px solid var(--admin-border);
+        display: flex;
+        justify-content: flex-end;
+        gap: var(--admin-spacing-md);
+    }
+
+    .admin-modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block admin_extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('editUserForm');
+    const modal = document.getElementById('confirmModal');
+    const closeModal = document.getElementById('closeModal');
+    const cancelModal = document.getElementById('cancelModal');
+    const confirmChanges = document.getElementById('confirmChanges');
+    const changesPreview = document.getElementById('changesPreview');
+    let originalData = {};
+
+    // Guardar datos originales
+    function saveOriginalData() {
+        originalData = {
+            username: document.getElementById('username').value,
+            email: document.getElementById('email').value,
+            is_admin: document.getElementById('is_admin').checked
+        };
+    }
+
+    // Detectar cambios
+    function getChanges() {
+        const changes = [];
+        if (document.getElementById('username').value !== originalData.username) {
+            changes.push(`Nombre de usuario: ${originalData.username} → ${document.getElementById('username').value}`);
+        }
+        if (document.getElementById('email').value !== originalData.email) {
+            changes.push(`Email: ${originalData.email} → ${document.getElementById('email').value}`);
+        }
+        if (document.getElementById('is_admin').checked !== originalData.is_admin) {
+            changes.push(`Administrador: ${originalData.is_admin ? 'Sí' : 'No'} → ${document.getElementById('is_admin').checked ? 'Sí' : 'No'}`);
+        }
+        if (document.getElementById('password').value) {
+            changes.push('Se cambiará la contraseña');
+        }
+        return changes;
+    }
+
+    // Mostrar modal con cambios
+    function showModal(changes) {
+        changesPreview.innerHTML = changes.length > 0 ? 
+            `<div class="admin-text-sm"><strong>Cambios detectados:</strong><ul class="admin-list admin-mt-2">
+                ${changes.map(change => `<li>${change}</li>`).join('')}
+            </ul></div>` :
+            '<p class="admin-text-sm">No se detectaron cambios</p>';
+        modal.classList.add('show');
+    }
+
+    // Validar contraseña
+    function validatePassword() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+
+        if (password || confirmPassword) {
+            if (password !== confirmPassword) {
+                return 'Las contraseñas no coinciden';
+            }
+            if (password.length < 8) {
+                return 'La contraseña debe tener al menos 8 caracteres';
+            }
+            if (!/\d/.test(password) || !/[a-zA-Z]/.test(password)) {
+                return 'La contraseña debe contener al menos un número y una letra';
+            }
+        }
+        return null;
+    }
+
+    // Inicializar
+    saveOriginalData();
+
+    // Event listeners
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const passwordError = validatePassword();
+        if (passwordError) {
+            alert(passwordError);
+            return;
+        }
+        const changes = getChanges();
+        showModal(changes);
+    });
+
+    closeModal.addEventListener('click', () => modal.classList.remove('show'));
+    cancelModal.addEventListener('click', () => modal.classList.remove('show'));
+    confirmChanges.addEventListener('click', () => form.submit());
+
+    // Cerrar modal al hacer clic fuera
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.classList.remove('show');
+        }
+    });
+
+    // Escape para cerrar modal
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.classList.contains('show')) {
+            modal.classList.remove('show');
+        }
+    });
+});
+</script>
+{% endblock %}

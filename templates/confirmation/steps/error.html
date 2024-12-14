@@ -1,0 +1,27 @@
+<div class="confirmation-step">
+    <div class="step-header error-header">
+        <h2>Lo sentimos</h2>
+        <p>Ha ocurrido un error</p>
+    </div>
+
+    <div class="step-content">
+        <div class="error-container">
+            <div class="error-icon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            
+            <div class="error-message">
+                <p>{{ error }}</p>
+            </div>
+
+            <div class="error-actions">
+                <button type="button"
+                        class="btn"
+                        hx-get="/htmx/confirm/{{ group_uuid }}"
+                        hx-target="#confirmation-form">
+                    Volver a intentar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

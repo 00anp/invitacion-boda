@@ -1,0 +1,159 @@
+{% extends "admin_base.html" %}
+
+{% block admin_content %}
+<div class="admin-container">
+    <!-- Header -->
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <h3 class="admin-card-title">
+                Gestión de Usuarios del Sistema
+            </h3>
+            <p class="admin-text-sm">
+                Crear y administrar usuarios del sistema
+            </p>
+        </div>
+    </div>
+
+    <!-- Formulario de creación -->
+    <div class="admin-card admin-mt-4">
+        <form id="createUserForm" method="POST" action="/admin/users/create" class="admin-form">
+            <div class="admin-form-grid">
+                <div class="admin-form-group">
+                    <label for="username" class="admin-label">
+                        Nombre de Usuario
+                    </label>
+                    <input type="text" name="username" id="username" required
+                           class="admin-input">
+                </div>
+
+                <div class="admin-form-group">
+                    <label for="email" class="admin-label">
+                        Correo Electrónico
+                    </label>
+                    <input type="email" name="email" id="email" required
+                           class="admin-input">
+                </div>
+
+                <div class="admin-form-group">
+                    <label for="password" class="admin-label">
+                        Contraseña
+                    </label>
+                    <input type="password" name="password" id="password" required
+                           class="admin-input">
+                </div>
+
+                <div class="admin-form-group">
+                    <label for="confirm_password" class="admin-label">
+                        Confirmar Contraseña
+                    </label>
+                    <input type="password" name="confirm_password" id="confirm_password" required
+                           class="admin-input">
+                </div>
+            </div>
+
+            <div class="admin-form-group admin-mt-4">
+                <label class="admin-checkbox-label">
+                    <input type="checkbox" name="is_admin" id="is_admin"
+                           class="admin-checkbox">
+                    <span>Es administrador</span>
+                </label>
+            </div>
+
+            <div class="admin-form-actions">
+                <button type="submit" class="admin-btn admin-btn-primary">
+                    Crear Usuario
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Lista de usuarios -->
+    <div class="admin-card admin-mt-6">
+        <div class="admin-card-header">
+            <h3 class="admin-card-title">Usuarios Existentes</h3>
+        </div>
+        <div class="admin-table-container">
+            <table class="admin-table admin-table-responsive">
+                <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th class="hide-mobile">Email</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td data-label="Usuario">{{ user.username }}</td>
+                        <td data-label="Email" class="hide-mobile">{{ user.email }}</td>
+                        <td data-label="Rol">
+                            {% if user.is_admin %}
+                                <span class="admin-badge admin-badge-success">
+                                    Admin
+                                </span>
+                            {% else %}
+                                <span class="admin-badge">
+                                    Usuario
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td data-label="Estado">
+                            {% if user.is_active %}
+                                <span class="admin-badge admin-badge-success">
+                                    Activo
+                                </span>
+                            {% else %}
+                                <span class="admin-badge admin-badge-danger">
+                                    Inactivo
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td data-label="Acciones" class="admin-actions">
+                            <div class="admin-btn-group">
+                                <a href="/admin/users/{{ user.id }}/edit" 
+                                   class="admin-btn admin-btn-secondary admin-btn-sm">
+                                   <i class="fa-solid fa-edit"></i>
+                                </a>
+                                {% if user.is_active %}
+                                    <form method="POST" action="/admin/users/{{ user.id }}/deactivate" class="admin-inline">
+                                        <button type="submit" class="admin-btn admin-btn-danger admin-btn-sm">
+                                            <i class="fa-solid fa-ban"></i>
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <form method="POST" action="/admin/users/{{ user.id }}/activate" class="admin-inline">
+                                        <button type="submit" class="admin-btn admin-btn-success admin-btn-sm">
+                                            <i class="fa-solid fa-check"></i>
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_extra_js %}
+<script>
+document.getElementById('createUserForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirm_password').value;
+    
+    if (password !== confirmPassword) {
+        alert('Las contraseñas no coinciden');
+        return;
+    }
+    
+    this.submit();
+});
+</script>
+{% endblock %}

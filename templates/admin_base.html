@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<!-- Estilos administrativos base -->
+<link rel="stylesheet" href="/static/css/admin.css">
+<!-- Permitir estilos adicionales en las páginas que heredan -->
+{% block admin_extra_css %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <!-- Barra de navegación administrativa -->
+    <nav class="admin-nav">
+        <div class="admin-nav-container">
+            <div class="admin-nav-logo">
+                Panel Administrativo
+            </div>
+            
+            <!-- Botón de menú móvil -->
+            <button id="mobileMenuBtn" class="admin-nav-mobile-button" aria-expanded="false" aria-label="Menú">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <div id="navMenu" class="admin-nav-menu">
+                <a href="/admin/dashboard" class="admin-nav-link {% if request.url.path == '/admin/dashboard' %}active{% endif %}">
+                    Dashboard
+                </a>
+                <a href="/admin/messages" class="admin-nav-link {% if request.url.path == '/admin/messages' %}active{% endif %}">
+                    Mensajes
+                </a>
+                <a href="/admin/guests" class="admin-nav-link {% if request.url.path == '/admin/guests' %}active{% endif %}">
+                    Invitados
+                </a>
+                {% if user and user.is_admin %}
+                <a href="/admin/users" class="admin-nav-link {% if request.url.path == '/admin/users' %}active{% endif %}">
+                    Usuarios
+                </a>
+                {% endif %}
+                {% if user %}
+                <div class="admin-nav-user">
+                    <a href="/admin/profile/edit" class="admin-nav-link">
+                        Editar Perfil
+                    </a>
+                    <span class="admin-nav-username">{{ user.username }}</span>
+                    <a href="/auth/logout" class="admin-nav-link admin-nav-link-danger">
+                        Cerrar Sesión
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido principal administrativo -->
+    <main class="admin-main">
+        {% block admin_content %}{% endblock %}
+    </main>
+</div>
+{% endblock %}
+
+<!-- Scripts específicos para el área administrativa -->
+{% block admin_scripts %}{% endblock %}
+
+
+{% block extra_js %}
+<script>
+    // Manejo del menú móvil
+    document.addEventListener('DOMContentLoaded', function() {
+        const mobileBtn = document.getElementById('mobileMenuBtn');
+        const navMenu = document.getElementById('navMenu');
+        
+        if (mobileBtn && navMenu) {
+            mobileBtn.addEventListener('click', () => {
+                mobileBtn.classList.toggle('active');
+                navMenu.classList.toggle('show');
+                const isExpanded = navMenu.classList.contains('show');
+                mobileBtn.setAttribute('aria-expanded', isExpanded);
+            });
+    
+            // Cerrar menú al hacer click fuera
+            document.addEventListener('click', (e) => {
+                if (!mobileBtn.contains(e.target) && !navMenu.contains(e.target)) {
+                    mobileBtn.classList.remove('active');
+                    navMenu.classList.remove('show');
+                    mobileBtn.setAttribute('aria-expanded', 'false');
+                }
+            });
+        }
+    });
+</script>
+{% block admin_extra_js %}{% endblock %}
+{% endblock %}

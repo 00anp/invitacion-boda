@@ -1,0 +1,128 @@
+{% extends "admin_base.html" %}
+
+{% block admin_content %}
+<div class="admin-container">
+    <!-- Encabezado -->
+    <div class="admin-card-header">
+        <div class="admin-flex admin-justify-between admin-items-center">
+            <h2 class="admin-card-title">Editar Perfil</h2>
+            <a href="/admin/dashboard" class="admin-btn admin-btn-secondary">
+                Volver al Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Formulario de edición -->
+    <div class="admin-card">
+        {% if error %}
+        <div class="admin-alert admin-alert-error">
+            <div class="admin-flex admin-items-center">
+                <div class="admin-flex-shrink-0">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                </div>
+                <div class="admin-ml-2">
+                    {{ error }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <form id="editProfileForm" method="POST" action="/admin/profile/edit" class="admin-form">
+            <div class="admin-grid admin-grid-cols-2">
+                <div class="admin-form-group">
+                    <label for="username" class="admin-label">
+                        Nombre de Usuario
+                    </label>
+                    <input type="text" 
+                           name="username" 
+                           id="username" 
+                           value="{{ edit_user.username }}"
+                           required
+                           class="admin-input">
+                </div>
+
+                <div class="admin-form-group">
+                    <label for="email" class="admin-label">
+                        Correo Electrónico
+                    </label>
+                    <input type="email" 
+                           name="email" 
+                           id="email" 
+                           value="{{ edit_user.email }}"
+                           required
+                           class="admin-input">
+                </div>
+
+                <div class="admin-form-group">
+                    <div class="admin-flex admin-justify-between">
+                        <label for="password" class="admin-label">
+                            Nueva Contraseña
+                        </label>
+                        <span class="admin-text-sm">(Opcional)</span>
+                    </div>
+                    <input type="password" 
+                           name="password" 
+                           id="password"
+                           class="admin-input"
+                           autocomplete="new-password"
+                           placeholder="Dejar en blanco para mantener la contraseña actual">
+                    <p class="admin-text-sm admin-mt-1">
+                        Mínimo 8 caracteres, debe incluir números y letras
+                    </p>
+                </div>
+
+                <div class="admin-form-group">
+                    <label for="confirm_password" class="admin-label">
+                        Confirmar Nueva Contraseña
+                    </label>
+                    <input type="password" 
+                           name="confirm_password" 
+                           id="confirm_password"
+                           class="admin-input"
+                           autocomplete="new-password">
+                </div>
+            </div>
+
+            <div class="admin-flex admin-justify-end admin-gap-4 admin-mt-6">
+                <a href="/admin/dashboard"
+                   class="admin-btn admin-btn-secondary">
+                    Cancelar
+                </a>
+                <button type="submit"
+                        id="submitBtn"
+                        class="admin-btn admin-btn-primary">
+                    Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block admin_extra_js %}
+<script>
+document.getElementById('editProfileForm').addEventListener('submit', function(e) {
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirm_password').value;
+
+    if (password || confirmPassword) {
+        if (password !== confirmPassword) {
+            e.preventDefault();
+            alert('Las contraseñas no coinciden');
+            return;
+        }
+        if (password.length < 8) {
+            e.preventDefault();
+            alert('La contraseña debe tener al menos 8 caracteres');
+            return;
+        }
+        if (!/\d/.test(password) || !/[a-zA-Z]/.test(password)) {
+            e.preventDefault();
+            alert('La contraseña debe contener al menos un número y una letra');
+            return;
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,65 @@
+<div class="confirmation-step">
+    <!-- Encabezado celebrativo -->
+    <div class="step-header success-header">
+        <h2>¡Gracias por confirmar!</h2>
+    </div>
+
+    <!-- Contenido -->
+    <div class="step-content">
+        <div class="success-content">
+            <p class="success-message">
+                Hemos registrado exitosamente su confirmación
+            </p>
+
+            <!-- Resumen de confirmaciones -->
+            <div class="confirmation-summary">
+                <h3>Confirmaciones registradas:</h3>
+                <div class="confirmed-guests">
+                    {% set attending_count = 0 %}
+                    {% for guest in confirmed_guests %}
+                        {% if guest.is_attending %}
+                            {% set attending_count = attending_count + 1 %}
+                        {% endif %}
+                        <div class="confirmed-guest-item {% if not guest.is_attending %}bg-gray-50{% endif %}">
+                            <span class="check-icon">
+                                {% if guest.is_attending %}
+                                    <i class="fa-solid fa-check text-green-600"></i>
+                                {% else %}
+                                    <i class="fa-solid fa-xmark text-red-600"></i>
+                                {% endif %}
+                            </span>
+                            <span class="guest-name">
+                                {{ guest.name }} - 
+                                {% if guest.is_attending %}
+                                    <span class="text-green-600">Asistirá</span>
+                                {% else %}
+                                    <span class="text-red-600">No podrá asistir</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Botón para ticket - solo si hay invitados que asistirán -->
+            {% if has_attending_guests %}
+            <div class="ticket-action">
+                <a href="/htmx/ticket/{{ group.uuid }}/jpg"
+                class="btn btn-special">
+                    <i class="fa-solid fa-ticket"></i>
+                    Descargar Boleto de Confirmación
+                </a>
+                <p class="success-message">
+                    No olviden presentar su Boleto el día del evento.
+                </p>
+            </div>
+            {% else %}
+            <div class="mt-6 text-center">
+                <p class="text-gray-600">
+                    Gracias por notificarnos. Lamentamos que no puedan acompañarnos.
+                </p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
