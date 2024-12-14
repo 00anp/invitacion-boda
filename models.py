@@ -1,10 +1,12 @@
+#On File
+from database import Base
+
 #Libraries
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import uuid
-#On File
-from database import Base
+
 
 
 def generate_uuid():
@@ -29,7 +31,9 @@ class User(Base):
     is_admin = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-
+    reset_token = Column(String(100), nullable=True)
+    reset_token_expires = Column(DateTime(timezone=True), nullable=True)
+    
 class Group(Base):
     """
     Modelo para los grupos de invitados.

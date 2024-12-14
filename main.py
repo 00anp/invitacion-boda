@@ -1,24 +1,58 @@
-#Libraries
+# Libraries
 from fastapi import FastAPI, Depends, HTTPException, Request, Path, status
 from fastapi.responses import HTMLResponse, FileResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from typing import Annotated, List, Union
 from starlette import status
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import RedirectResponse, HTMLResponse
+from starlette.middleware.sessions import SessionMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from datetime import datetime
 from weasyprint import HTML, CSS
 from io import BytesIO
 import base64
-from pathlib import Path as PathLib 
-#On File
+from pathlib import Path as PathLib
+from jose import JWTError, jwt 
+from dotenv import load_dotenv
+import os
+# On File - Importamos todos los routers necesarios
 import models
 from models import User, Group, Guest, Message, MessageSignature
 from database import engine, SessionLocal
-from routers import auth, confirmations
+from routers import (
+    auth,           # Autenticación
+    confirmations,  # Confirmaciones de asistencia
+    admin,          # Panel de administración general
+    messages        # Gestión de mensajes (ahora parte del admin)
+)
+
+load_dotenv()
+
+BASE_DIR = PathLib(__file__).resolve().parent
+SECRET_KEY = os.getenv('SECRET_KEY')
+ALGORITHM = os.getenv('ALGORITHM')
+
+# Inicialización de la aplicación
+app = FastAPI()
+# Configuración de archivos estáticos 
+app.mount(
+    "/static", 
+    StaticFiles(
+        directory=str(BASE_DIR / "static"),
+        # Añadimos configuración HTML5 para manejo de rutas
+        html=True,
+        check_dir=True
+    ), 
+    name="static"
+)
+# Configuración de templates después de los estáticos
+templates = Jinja2Templates(directory="templates")
+# Configuración de la base de datos
+models.Base.metadata.create_all(bind=engine)
 
 class MethodOverrideMiddleware(BaseHTTPMiddleware):
     """
@@ -26,28 +60,87 @@ class MethodOverrideMiddleware(BaseHTTPMiddleware):
     o el header X-HTTP-Method-Override.
     """
     async def dispatch(self, request, call_next):
-        # Verificamos si hay un método override en la query string
         method = request.query_params.get("_method", "").upper()
         
-        # Si no está en query params, buscamos en headers
         if not method:
             method = request.headers.get("X-HTTP-Method-Override", "").upper()
         
-        # Si encontramos un método válido y la petición es POST, actualizamos
         if method in ["PUT", "DELETE", "PATCH"] and request.method == "POST":
             request._method = method
             
         return await call_next(request)
 
 
-app = FastAPI()
-templates = Jinja2Templates(directory="templates")
-models.Base.metadata.create_all(bind=engine)
+class AuthMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        # Rutas que no requieren autenticación
+        public_paths = ['/', '/auth/token', '/auth/logout', '/static']
+        
+        # Verificar si la ruta actual es pública
+        if any(request.url.path.startswith(path) for path in public_paths):
+            response = await call_next(request)
+            return response
 
+        # Para rutas protegidas, verificar el token
+        access_token = request.cookies.get('access_token')
+        
+        if not access_token:
+            # Redirigir al login y establecer la URL de retorno
+            return RedirectResponse(
+                url=f"/auth/token?next={request.url.path}",
+                status_code=302
+            )
+
+        try:
+            # Limpiar el token
+            token = access_token.replace("Bearer ", "") if access_token.startswith("Bearer ") else access_token
+            
+            # Verificar el token
+            payload = jwt.decode(
+                token, 
+                SECRET_KEY, 
+                algorithms=[ALGORITHM]
+            )
+            
+            # Si llegamos aquí, el token es válido
+            response = await call_next(request)
+            return response
+
+        except JWTError:
+            return RedirectResponse(
+                url="/auth/token",
+                status_code=302
+            )
+        except Exception as e:
+            return RedirectResponse(
+                url="/auth/token",
+                status_code=302
+            )
+
+# Middleware
+app.add_middleware(MethodOverrideMiddleware)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=SECRET_KEY,
+    same_site="lax",
+    https_only=True
+)
+app.add_middleware(AuthMiddleware)
+# Routers
 app.include_router(auth.router)
+app.include_router(admin.router)
 app.include_router(confirmations.router)
 
 
+
+# Dependencia de base de datos
 def get_db():
     db = SessionLocal()
     try:
@@ -55,85 +148,72 @@ def get_db():
     finally:
         db.close()
 
-
 db_dependency = Annotated[Session, Depends(get_db)]
-app.add_middleware(MethodOverrideMiddleware)
 
 
-class GuestRequest(BaseModel):
+async def render_invitation(
+    request: Request,
+    db: Session,
+    group_uuid: str | None = None
+):
     """
-    Modelo para validar los datos de cada invitado.
+    Función auxiliar que maneja la lógica de renderizado para ambas rutas
     """
-    name: str = Field(min_length=2, max_length=100)
-    email: Union[str, None] = None
-    phone: Union[str, None] = None
+    context = {
+        "request": request,
+        "group": None,
+        "all_confirmed": False,
+        "group_uuid": None
+    }
+
+    if group_uuid:
+        group = db.query(Group).filter(Group.uuid == group_uuid).first()
+        if group:
+            # Serializamos los invitados
+            serialized_guests = [
+                {
+                    "id": guest.id,
+                    "name": guest.name,
+                    "has_confirmed": guest.has_confirmed,
+                    "is_attending": guest.is_attending
+                }
+                for guest in group.guests
+            ]
+            
+            context.update({
+                "group": {
+                    "id": group.id,
+                    "name": group.name,
+                    "uuid": group.uuid,
+                    "guests": serialized_guests
+                },
+                "group_uuid": group.uuid,
+                "all_confirmed": all(guest.has_confirmed for guest in group.guests)
+            })
+
+    return templates.TemplateResponse("index.html", context)
 
 
-class GroupRequest(BaseModel):
-    """
-    Modelo para validar los datos del grupo completo.
-    Incluye el nombre del grupo y la lista de invitados.
-    """
-    name: str = Field(min_length=2, max_length=100)
-    guests: List[GuestRequest]
-
-
-class GuestConfirmation(BaseModel):
-    """
-    Modelo para validar la confirmación de asistencia de un invitado.
-    """
-    guest_id: int = Field(gt=0, description="ID del invitado que confirma")
-    is_attending: bool = Field(description="Indica si el invitado asistirá")
-
-
-class GroupConfirmation(BaseModel):
-    """
-    Modelo para validar las confirmaciones de todo el grupo.
-    """
-    confirmations: List[GuestConfirmation]
-
-
+# Rutas principales
 @app.get("/", response_class=HTMLResponse)
-async def welcome_message(request: Request):
+async def welcome_message(
+    request: Request,
+    db: Session = Depends(get_db)
+):
     """
-    Endpoint que renderiza la página de bienvenida usando el template.
-    Los datos se pasan directamente al template sin necesidad de una API separada.
+    Ruta para la vista general de la invitación
     """
-    return templates.TemplateResponse(
-        "index.html",
-        {
-            "request": request,
-            "title": "¡Bienvenidos a nuestra boda!",
-            "message": "Estamos muy emocionados de compartir este momento tan especial con ustedes.",
-            "submessage": "En este sitio podrán confirmar su asistencia y dejarnos sus mensajes de buenos deseos."
-        }
-    )
+    return await render_invitation(request, db)
 
 
-@app.get("/{group_uuid}", response_class=HTMLResponse)
+@app.get("/{group_uuid}", response_class=HTMLResponse, name="grupo")
 async def group_welcome(
     request: Request,
     group_uuid: str,
-    db: db_dependency
+    db: Session = Depends(get_db)
 ):
     """
-    Endpoint que muestra la página de bienvenida específica para un grupo.
-    Incluye el formulario de confirmación de asistencia para cada invitado.
+    Ruta para la vista personalizada con grupo específico
     """
-    # Obtenemos el grupo y sus invitados
-    group = db.query(Group).filter(Group.uuid == group_uuid).first()
-    
-    # Verificamos si todos los invitados han confirmado
-    all_confirmed = False
-    if group:
-        all_confirmed = all(guest.has_confirmed for guest in group.guests)
-    
-    # Renderizamos el template con todos los datos necesarios
-    return templates.TemplateResponse(
-        "group.html",
-        {
-            "request": request,
-            "group": group,
-            "all_confirmed": all_confirmed
-        }
-    )
+    return await render_invitation(request, db, group_uuid)
+
