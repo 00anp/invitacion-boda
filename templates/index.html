@@ -1,13 +1,351 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block content %}
+<div class="container">
+  <header
+    class="hero"
+    id="hero-section"
+    style="background-image: url('/static/img/DSC4048.webp')"
+  >
+    <div class="titles flex flex-col gap-lg text-light">
+      <h1 class="text-primary text-4xl">Mariana & Josué</h1>
+      <h2 class="text-primary text-2xl">Bienvenidos a la nuestra</h2>
+      <p class="text-primary text-xl font-bold">
+        Cada familia tiene su historia
+      </p>
+    </div>
 
-{% block content %}
-<div class="welcome-message p-6 bg-white rounded-lg shadow-lg">
-    <h1 class="text-3xl font-bold mb-4">{{ title }}</h1>
-    <p class="text-lg text-gray-700 mb-4">
-        {{ message }}
-    </p>
-    <p class="text-lg text-gray-700">
-        {{ submessage }}
-    </p>
+    <div class="countdown-container">
+      <div class="countdown-box">
+        <span class="num text-2xl font-bold" id="day-box">00</span>
+        <span class="text">Días</span>
+      </div>
+      <div class="countdown-box">
+        <span class="num text-2xl font-bold" id="hr-box">00</span>
+        <span class="text">Horas</span>
+      </div>
+      <div class="countdown-box">
+        <span class="num text-2xl font-bold" id="min-box">00</span>
+        <span class="text">Minutos</span>
+      </div>
+      <div class="countdown-box">
+        <span class="num text-2xl font-bold" id="sec-box">00</span>
+        <span class="text">Segundos</span>
+      </div>
+    </div>
+  </header>
+
+  <section class="nos-casamos">
+    <div class="wedding-grid">
+      <div class="wedding-content">
+        <h2 class="text-primary text-3xl">¡Nos casamos!</h2>
+        <p class="text-description">
+          Con mucho amor y alegría tenemos el honor de invitarlos a compartir
+          con nosotros el día más especial de nuestras vidas. Será un placer
+          disfrutar juntos este momento tan importante.
+        </p>
+      </div>
+      <div class="wedding-image">
+        <div
+          class="image-container"
+          style="background-image: url('/static/img/DSC04303.webp')"
+        ></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="padrinos">
+    <div class="padrinos-card">
+      <img
+        class="svg"
+        src="/static/svg/wedding-rings-wedding-svgrepo-com.svg"
+        alt="Anillos de boda"
+      />
+      <h2 class="text-primary text-3xl">Nuestros padrinos</h2>
+      <div class="padrinos-carousel" data-carousel>
+        <button
+          class="carousel-prev btn padrinos-carousel-btn"
+          data-carousel-button="prev"
+        >
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <button
+          class="carousel-next btn padrinos-carousel-btn"
+          data-carousel-button="next"
+        >
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+        <ul data-slides>
+          <li class="slide" data-active>
+            <div class="carousel-item sponsor-card p-md">
+              <h3 class="text-primary text-xl font-bold">Isabel Pelayo</h3>
+              <h3 class="text-primary text-xl font-bold">&</h3>
+              <h3 class="text-primary text-xl font-bold">Rafael Núñez</h3>
+              <p>Padrinos de velación</p>
+            </div>
+          </li>
+          <li class="slide">
+            <div class="carousel-item sponsor-card">
+              <h3 class="text-primary text-xl font-bold">Luz María Olivares</h3>
+              <p>Madrina de anillos</p>
+            </div>
+          </li>
+          <li class="slide">
+            <div class="carousel-item sponsor-card">
+              <h3 class="text-primary text-xl font-bold">Patricia Reyes</h3>
+              <h3 class="text-primary text-xl font-bold">&</h3>
+              <h3 class="text-primary text-xl font-bold">Saúl Olivares</h3>
+              <p>Padrinos de arras</p>
+            </div>
+          </li>
+          <li class="slide">
+            <div class="carousel-item sponsor-card">
+              <h3 class="text-primary text-xl font-bold">Conchita Galicia</h3>
+              <p>Madrina de Lazo</p>
+            </div>
+          </li>
+          <li class="slide">
+            <div class="carousel-item sponsor-card">
+              <h3 class="text-primary text-xl font-bold">Daniela Sánchez</h3>
+              <p>Madrina de ramo</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="fecha p-lg">
+    <div class="fecha-container bg-secondary p-lg">
+      <h2 class="text-3xl m-lg text-primary">Sábado 5 de abril de 2025</h2>
+      <div class="event-cards-container">
+        <div class="event-card bg-primary text-light p-md">
+          <img
+            class="svg m-md"
+            src="/static/svg/wedding-svgrepo-com.svg"
+            alt="Ícono ceremonia"
+          />
+          <h3 class="text-lg font-bold text-primary">Ceremonia</h3>
+          <p class="m-sm">1 pm</p>
+          <p class="m-sm text-lg">Parroquia de Santiago Apóstol Cuautlalpan</p>
+          <p class="m-sm address">
+            5 de Mayo 1, Cuautlalpan, 56250 Villa Santiago Cuautlalpan, Méx.
+          </p>
+          <a
+            href="https://maps.app.goo.gl/gnDrtHq2QtAV8qxZ7"
+            target="_blank"
+            class="btn m-md map-btn"
+            >Abrir mapa</a
+          >
+        </div>
+        <div class="event-card bg-primary text-light p-md">
+          <img
+            class="svg m-md"
+            src="/static/svg/cheers-toast-svgrepo-com.svg"
+            alt="Ícono recepción"
+          />
+          <h3 class="text-lg font-bold text-primary">Recepción</h3>
+          <p class="m-sm">2:30 pm</p>
+          <p class="m-sm text-lg">Jardín La Concordia</p>
+          <p class="m-sm address">
+            Av. Gral. González Montecillo Manzana 010, Cuautlalpan, 56264
+            Montecillo, Méx.
+          </p>
+          <a
+            href="https://maps.app.goo.gl/Edh4V6x33Gt6S46b6"
+            target="_blank"
+            class="btn m-md map-btn"
+            >Abrir mapa</a
+          >
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="consideraciones p-lg">
+    <div class="consideraciones-container">
+      <h2 class="text-3xl m-lg text-primary">Consideraciones</h2>
+      <div class="max-w-lg mx-auto">
+        <p class="consideraciones-text">
+          El color blanco y sus derivados son colores representativos de nuestro
+          día por lo que pedimos reservarlos exclusivamente para la novia.
+        </p>
+        <p class="consideraciones-text">
+          Este día tan importante amerita una vestimenta especial.
+        </p>
+        <p class="text-2xl font-bold m-lg text-primary">FORMAL</p>
+        <div class="dress-code">
+          <img
+            class="svg"
+            src="/static/svg/suit-and-tie-outfit-svgrepo-com.svg"
+            alt="Ícono traje"
+          />
+          <img
+            class="svg"
+            src="/static/svg/evening-gown-fashion-dress-clothes-svgrepo-com.svg"
+            alt="Ícono vestido"
+          />
+        </div>
+        <p class="consideraciones-text">
+          Con el propósito de crear un ambiente íntimo y especial nuestra boda
+          está planeada
+        </p>
+        <p class="text-2xl font-bold m-lg text-primary">SOLAMENTE ADULTOS</p>
+        <p class="consideraciones-text">
+          Gracias por comprender y hacer este día único.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="mesa-regalos p-lg">
+    <div class="mesa-regalos-container">
+      <img
+        class="svg m-lg"
+        src="/static/svg/travel-svgrepo-com.svg"
+        alt="Ícono regalo"
+      />
+      <h2 class="text-3xl m-lg text-primary">Mesa de regalos</h2>
+      <div class="max-w-lg mx-auto text-center">
+        <p class="regalos-text">
+          El mejor regalo será contar con su presencia pero si desean contribuir
+          con nuestro nuevo comienzo, lo pueden hacer de la siguiente manera.
+        </p>
+        <img
+          class="svg nu m-lg"
+          src="/static/svg/nubank_logo_icon_248348.svg"
+          alt="Nu bank logo"
+        />
+        <h3 class="text-2xl m-md nu-banco">NU Banco</h3>
+        <div class="bank-cards-container">
+          <div class="bank-card p-md">
+            <h4 class="text-primary text-lg font-bold">
+              Mariana Ramírez Escalante
+            </h4>
+            <p>CLABE: 638180010149579703</p>
+            <button class="copy-btn" data-clabe="638180010149579703">
+              <i class="fa-regular fa-copy"></i>
+            </button>
+          </div>
+          <div class="bank-card p-md">
+            <h4 class="text-primary text-lg font-bold">Josué López Olivares</h4>
+            <p>CLABE: 638180010166024257</p>
+            <button class="copy-btn" data-clabe="638180010166024257">
+              <i class="fa-regular fa-copy"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="galeria p-lg">
+    <div class="galeria-container">
+      <h2 class="text-primary text-3xl m-lg">
+        Nuestro amor, nuestra historia...
+      </h2>
+      <div class="photo-carousel" id="photos-carousel" data-carousel>
+        <button class="carousel-button prev" data-carousel-button="prev">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <button class="carousel-button next" data-carousel-button="next">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+        <ul data-slides>
+          <li class="slide" data-active>
+            <div
+              class="gallery-image"
+              style="background-image: url('/static/img/DSC3925.webp')"
+            ></div>
+          </li>
+          <li class="slide">
+            <div
+              class="gallery-image"
+              style="background-image: url('/static/img/DSC3969.webp')"
+            ></div>
+          </li>
+          <li class="slide">
+            <div
+              class="gallery-image"
+              style="background-image: url('/static/img/DSC4042.webp')"
+            ></div>
+          </li>
+          <li class="slide">
+            <div
+              class="gallery-image"
+              style="background-image: url('/static/img/DSC4080.webp')"
+            ></div>
+          </li>
+          <li class="slide">
+            <div
+              class="gallery-image"
+              style="background-image: url('/static/img/DSC4085.webp')"
+            ></div>
+          </li>
+          <li class="slide">
+            <div
+              class="gallery-image"
+              style="background-image: url('/static/img/DSC3991.webp')"
+            ></div>
+          </li>
+          <li class="slide">
+            <div
+              class="gallery-image"
+              style="background-image: url('/static/img/DSC04135.webp')"
+            ></div>
+          </li>
+          <li class="slide">
+            <div
+              class="gallery-image"
+              style="background-image: url('/static/img/DSC04166.webp')"
+            ></div>
+          </li>
+          <li class="slide">
+            <div
+              class="gallery-image"
+              style="background-image: url('/static/img/DSC04224.webp')"
+            ></div>
+          </li>
+          <li class="slide">
+            <div
+              class="gallery-image"
+              style="background-image: url('/static/img/DSC4048.webp')"
+            ></div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sección de confirmación -->
+  <section
+    class="confirmar"
+    style="background-image: url('/static/img/DSC04166.webp')"
+  >
+    <div class="confirmar-container">
+      <div class="text-overlay">
+        {% if group %}
+                <!-- Contenedor para HTMX -->
+                <div id="confirmation-form"
+                     hx-get="/htmx/confirm/{{ group.uuid }}"
+                     hx-trigger="load"
+                     hx-swap="innerHTML">
+                    <!-- El contenido será cargado por HTMX -->
+                </div>
+            {% else %}
+                <div class="backdrop-filter">
+                    <h2 class="text-primary text-3xl m-lg text-shadow">Confirmación</h2>
+                    <div class="confirmation-message text-shadow">
+                        <p class="text-xl font-bold m-lg">
+                            Les pedimos confirmar con el link que les proporcionamos.
+                        </p>
+                        <p class="text-lg font-bold m-lg">
+                            Para cualquier aclaración, favor de contactar a los novios.
+                        </p>
+                        <p class="text-lg m-md">Gracias por tu comprensión y apoyo.</p>
+                    </div>
+                </div>
+            {% endif %}
+      </div>
+    </div>
+  </section>
 </div>
 {% endblock %}
