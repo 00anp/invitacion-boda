@@ -1,6 +1,3 @@
-{% extends "base.html" %}
-
-{% block content %}
 <div class="confirmation-step">
     <!-- Encabezado del formulario -->
     <div class="step-header">
@@ -11,7 +8,7 @@
     <!-- Contenido del paso -->
     <div class="step-content">
         <h3>¡Bienvenidos!</h3>
-        <p>Por favor, seleccionen a todos los invitados para confirmar:</p>
+        <p>Por favor, seleccionen a todos los invitados para proceder:</p>
 
         <!-- Formulario con HTMX -->
         <form hx-post="/htmx/confirm/{{ group.uuid }}/step/1"
@@ -19,24 +16,27 @@
               hx-swap="innerHTML"
               class="guest-selection-form">
             
-            {% for guest in group.guests %}
-            <div class="guest-item {% if guest.has_confirmed %}confirmed{% endif %}">
-                <input type="checkbox"
-                       id="guest_{{ guest.id }}"
-                       name="selected_guests"
-                       value="{{ guest.id }}"
-                       {% if guest.has_confirmed %}disabled{% endif %}
-                       {% if not guest.has_confirmed %}required{% endif %}>
-                <label for="guest_{{ guest.id }}" class="guest-label">
-                    <span class="guest-name">{{ guest.name }}</span>
-                    {% if guest.has_confirmed %}
-                    <span class="guest-status">
-                        Ya confirmado - {{ "Asistirá" if guest.is_attending else "No asistirá" }}
-                    </span>
-                    {% endif %}
-                </label>
+            <!-- Nuevo contenedor scrolleable -->
+            <div class="guest-items-container">
+                {% for guest in group.guests %}
+                <div class="guest-item {% if guest.has_confirmed %}confirmed{% endif %}">
+                    <input type="checkbox"
+                           id="guest_{{ guest.id }}"
+                           name="selected_guests"
+                           value="{{ guest.id }}"
+                           {% if guest.has_confirmed %}disabled{% endif %}
+                           {% if not guest.has_confirmed %}required{% endif %}>
+                    <label for="guest_{{ guest.id }}" class="guest-label">
+                        <span class="guest-name">{{ guest.name }}</span>
+                        {% if guest.has_confirmed %}
+                        <span class="guest-status">
+                            Ya confirmado - {{ "Asistirá" if guest.is_attending else "No asistirá" }}
+                        </span>
+                        {% endif %}
+                    </label>
+                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
 
             <!-- Botones de navegación -->
             <div class="step-navigation">
@@ -59,4 +59,3 @@
         </div>
     </div>
 </div>
-{% endblock %}
