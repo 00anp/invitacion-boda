@@ -17,11 +17,12 @@
                 {% for guest in group.guests %}
                 <div class="guest-item {% if guest.has_confirmed %}confirmed{% endif %}">
                     <input type="checkbox"
+                           id="guest-checkbox-{{ guest.id }}"
                            name="selected_guests"
                            value="{{ guest.id }}"
                            {% if guest.has_confirmed %}disabled{% endif %}
                            {% if not guest.has_confirmed %}required{% endif %}>
-                    <label class="guest-label">
+                    <label for="guest-checkbox-{{ guest.id }}" class="guest-label">
                         <span class="guest-name">{{ guest.name }}</span>
                         {% if guest.has_confirmed %}
                         <span class="guest-status">
