@@ -72,7 +72,6 @@ tzdata==2024.2
 uvicorn==0.24.0
 uvloop==0.21.0
 watchfiles==1.0.0
-weasyprint==63.0
 webencodings==0.5.1
 websockets==14.1
 zopfli==0.2.3.post1

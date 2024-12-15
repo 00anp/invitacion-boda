@@ -1,33 +1,26 @@
 # Libraries
-from fastapi import FastAPI, Depends, HTTPException, Request, Path, status
-from fastapi.responses import HTMLResponse, FileResponse, StreamingResponse
+from fastapi import FastAPI, Depends, Request
+from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
-from typing import Annotated, List, Union
-from starlette import status
+from typing import Annotated
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import RedirectResponse, HTMLResponse
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
-from datetime import datetime
-from weasyprint import HTML, CSS
-from io import BytesIO
-import base64
 from pathlib import Path as PathLib
 from jose import JWTError, jwt 
 from dotenv import load_dotenv
 import os
 # On File - Importamos todos los routers necesarios
 import models
-from models import User, Group, Guest, Message, MessageSignature
+from models import Group
 from database import engine, SessionLocal
 from routers import (
-    auth,           # Autenticación
-    confirmations,  # Confirmaciones de asistencia
-    admin,          # Panel de administración general
-    messages        # Gestión de mensajes (ahora parte del admin)
+    auth,
+    confirmations,
+    admin
 )
 
 load_dotenv()

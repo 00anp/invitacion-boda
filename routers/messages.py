@@ -1,18 +1,17 @@
 #Libraries
-from fastapi import APIRouter, Depends, HTTPException, Request, Cookie, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Cookie
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 from database import SessionLocal
-from typing import Optional, List, Dict, Any, Annotated
+from typing import Optional, Annotated
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
-from datetime import datetime, timedelta, timezone
 
 #On File
-from models import Message, MessageSignature, Group, Guest, User
+from models import Message, MessageSignature
 from config import get_settings
 
 settings = get_settings()

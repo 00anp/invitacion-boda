@@ -1,6 +1,6 @@
 #Libraries
 from fastapi import Depends, HTTPException, Request, status, APIRouter, Cookie,  BackgroundTasks, Form
-from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from typing import Annotated, List, Union, Optional
@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 from datetime import datetime, timedelta, timezone
 from passlib.context import CryptContext 
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
-from jose import jwt, JWTError
+from jose import jwt
 import secrets
 #On File
 import models

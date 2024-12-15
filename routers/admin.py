@@ -1,9 +1,9 @@
 #Libraries
-from fastapi import Depends, HTTPException, Request, Path, status, APIRouter, Query, Cookie, UploadFile, File, Form
-from fastapi.responses import HTMLResponse, FileResponse, StreamingResponse, RedirectResponse
+from fastapi import Depends, HTTPException, Request, Path, status, APIRouter, Cookie, UploadFile, File
+from fastapi.responses import HTMLResponse, StreamingResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import func, select
+from sqlalchemy import func
 from typing import Annotated, List, Union, Optional, Dict
 from starlette import status
 from starlette.responses import RedirectResponse, HTMLResponse
@@ -15,11 +15,8 @@ from jose import jwt, JWTError
 import pandas as pd
 import re
 from io import BytesIO
-import base64
 from pathlib import Path as PathLib
 from PIL import Image, ImageDraw, ImageFont
-import os
-
 #On File
 import models
 from models import User, Group, Guest, Message, MessageSignature

@@ -1,21 +1,18 @@
 #Libraries
-from fastapi import Depends, HTTPException, Request, Path, status, APIRouter
-from fastapi.responses import HTMLResponse, FileResponse, StreamingResponse
+from fastapi import Depends, HTTPException, Request, APIRouter
+from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from typing import Annotated, List, Union
-from starlette.responses import RedirectResponse, HTMLResponse
+from starlette.responses import HTMLResponse
 from pydantic import BaseModel, Field
 from datetime import datetime
-from weasyprint import HTML, CSS
 from io import BytesIO
-import base64
 from pathlib import Path as PathLib
 from PIL import Image, ImageDraw, ImageFont
-import os
 import re
 #On File
-from models import User, Group, Guest, Message, MessageSignature
+from models import Group, Guest, Message, MessageSignature
 from database import engine, SessionLocal
 from utils.input_validation import InputValidation
 
@@ -25,7 +22,6 @@ router = APIRouter(
     tags=['confirmations']
 )
 templates = Jinja2Templates(directory="templates")
-
 
 
 def get_db():
