@@ -1,29 +1,27 @@
-<div id="confirmation-step-container" class="confirmation-step">
-    <div id="step-header-container" class="step-header">
+<div class="confirmation-step">
+    <div class="step-header">
         <h2>Confirmación de Asistencia</h2>
         <p>Paso 1 de 3</p>
     </div>
 
-    <div id="step-content-container" class="step-content">
+    <div class="step-content">
         <h3>¡Bienvenidos!</h3>
-        <p>Por favor, seleccionen a todos los invitados para confirmar:</p>
+        <p>Por favor, seleccionen a todos los invitados para proceder:</p>
 
-        <form id="guest-selection-form"
-              hx-post="/htmx/confirm/{{ group.uuid }}/step/1"
+        <form hx-post="/htmx/confirm/{{ group.uuid }}/step/1"
               hx-target="#confirmation-form"
               hx-swap="innerHTML"
               class="guest-selection-form">
             
-            <div id="scrollable-guests-container" class="guest-items-container">
+            <div class="guest-items-container">
                 {% for guest in group.guests %}
-                <div id="guest-item-{{ guest.id }}" class="guest-item {% if guest.has_confirmed %}confirmed{% endif %}">
+                <div class="guest-item {% if guest.has_confirmed %}confirmed{% endif %}">
                     <input type="checkbox"
-                           id="guest-checkbox-{{ guest.id }}"
                            name="selected_guests"
                            value="{{ guest.id }}"
                            {% if guest.has_confirmed %}disabled{% endif %}
                            {% if not guest.has_confirmed %}required{% endif %}>
-                    <label for="guest-checkbox-{{ guest.id }}" class="guest-label">
+                    <label class="guest-label">
                         <span class="guest-name">{{ guest.name }}</span>
                         {% if guest.has_confirmed %}
                         <span class="guest-status">
@@ -35,9 +33,8 @@
                 {% endfor %}
             </div>
 
-            <div id="navigation-buttons" class="step-navigation">
+            <div class="step-navigation">
                 <button type="submit"
-                        id="continue-button"
                         class="btn continue-btn"
                         {% if all_confirmed %}disabled{% endif %}>
                     Continuar
