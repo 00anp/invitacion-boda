@@ -543,7 +543,7 @@ body {
 
   .admin-card {
     padding: var(--admin-spacing-md);
-    flex:1 1 0px;
+    flex:0 1 0px;
   }
 
   .admin-nav-items {
