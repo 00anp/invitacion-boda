@@ -1737,6 +1737,78 @@ section {
   }
 }
 
+@media (max-height: 1200px) {
+    /* Contenedor principal del paso */
+    .confirmation-step {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        max-height: 100vh;
+        overflow: hidden;
+    }
+
+    /* Header del paso */
+    .step-header {
+        flex-shrink: 0;
+    }
+
+    /* Contenido del paso con scroll */
+    .step-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: var(--spacing-lg);
+        padding-bottom: 100px; /* Espacio para los botones */
+    }
+
+    /* Navegación fija en la parte inferior */
+    .step-navigation {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: hsla(0, 0%, 84%, 0.95);
+        padding: var(--spacing-md);
+        display: flex;
+        justify-content: space-between;
+        z-index: 20;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Ajuste para success page */
+    .success-content {
+        height: calc(100vh - 200px);
+        overflow-y: auto;
+        padding-bottom: 100px;
+    }
+
+    /* Estilos para el scrollbar */
+    .step-content::-webkit-scrollbar,
+    .success-content::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .step-content::-webkit-scrollbar-track,
+    .success-content::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+    }
+
+    .step-content::-webkit-scrollbar-thumb,
+    .success-content::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+    }
+
+    /* Ajustes específicos para step 2 */
+    .attendance-form {
+        padding-bottom: 100px;
+    }
+
+    /* Ajustes específicos para step 3 */
+    .message-form {
+        padding-bottom: 100px;
+    }
+}
+
 /* Media Queries para Responsividad */
 @media (max-width: 1024px) {
   :root {
