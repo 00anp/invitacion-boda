@@ -140,34 +140,58 @@ async def advance_to_step_one(
                     "error": "Grupo no encontrado"
                 }
             )
+        # Original code commented
+        ## Serializar los datos necesarios
+        # guests_data = [
+        #     {
+        #         "id": guest.id,
+        #         "name": guest.name,
+        #         "has_confirmed": guest.has_confirmed,
+        #         "is_attending": guest.is_attending
+        #     }
+        #     for guest in group.guests
+        # ]
 
-        # Serializar los datos necesarios
-        guests_data = [
+        # group_data = {
+        #     "id": group.id,
+        #     "name": group.name,
+        #     "uuid": group.uuid,
+        #     "guests": guests_data
+        # }
+
+        ## Cargar step_1
+        # return templates.TemplateResponse(
+        #     "confirmation/steps/step_1.html",
+        #     {
+        #         "request": request,
+        #         "group": group_data,
+        #         "all_confirmed": False
+        #     }
+        # )
+
+        selected_guests = [
             {
                 "id": guest.id,
                 "name": guest.name,
                 "has_confirmed": guest.has_confirmed,
                 "is_attending": guest.is_attending
             }
-            for guest in group.guests
+            for guest in group.guests if not guest.has_confirmed
         ]
 
-        group_data = {
-            "id": group.id,
-            "name": group.name,
-            "uuid": group.uuid,
-            "guests": guests_data
-        }
-
-        # Cargar step_1
         return templates.TemplateResponse(
-            "confirmation/steps/step_1.html",
+            "confirmation/steps/step_2.html",
             {
                 "request": request,
-                "group": group_data,
-                "all_confirmed": False
+                "group": {
+                    "id": group.id,
+                    "name": group.name,
+                    "uuid": group.uuid
+                },
+                "selected_guests": selected_guests
             }
         )
+    
     except Exception as e:
         return templates.TemplateResponse(
             "confirmation/steps/error.html",
